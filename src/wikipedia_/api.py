@@ -2,10 +2,11 @@ import requests
 import wikipedia
 from bs4 import BeautifulSoup
 import time
+import json
 import re
 from tqdm import tqdm
 from logger import logger
-
+from ..database.redis import get_redis_client
 
 # Configure user-agent for all Wikipedia API requests
 USER_AGENT = "LearningPathGenerator/0.1 (https://github.com/yourusername/learning_path)"
@@ -21,8 +22,29 @@ def enrich_with_wikipedia(topics):
 
         try:
             # Try to get the Wikipedia page directly
-            page = wikipedia.page(title, auto_suggest=False)
-            add_wikipedia_data(topic, page)
+            redis_client = get_redis_client()
+            cache_key = f"wikipedia:{title}"
+            cached_data = redis_client.get(cache_key)
+
+            if cached_data:
+                page_data = json.loads(cached_data)
+                topic.update(page_data)
+                logger.debug(f"Retrieved Wikipedia data for '{title}' from cache")
+            else:
+                page = wikipedia.page(title, auto_suggest=False)
+                add_wikipedia_data(topic, page)
+                # Cache the Wikipedia data
+                page_data = {
+                    "url": topic["url"],
+                    "summary": topic["summary"],
+                    "categories": topic["categories"],
+                    "content": topic["content"],
+                    "sections": topic["sections"],
+                }
+                redis_client.set(
+                    cache_key, json.dumps(page_data), ex=3600
+                )  # Cache for 1 hour
+                logger.debug(f"Cached Wikipedia data for '{title}'")
 
         except wikipedia.exceptions.DisambiguationError as e:
             # Handle disambiguation pages
@@ -104,7 +126,7 @@ def enrich_with_wikipedia(topics):
 def add_wikipedia_data(topic, page):
     """Add Wikipedia data to a topic."""
     # Extract clean content without citation markers
-    content = re.sub(r"\[\d+\]", "", page.content)
+    content = re.sub(r"\[\d+]", "", page.content)
 
     # Get page sections from TOC
     sections = []

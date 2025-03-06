@@ -159,8 +159,13 @@ def generate_graphml_and_save_as_html(knowledge_graph_data: dict, output_dir="ou
     output_dir.mkdir(exist_ok=True)
 
     # Set filenames
-    graphml_file = output_dir / "knowledge_graph.graphml"
-    html_file = output_dir / "knowledge_graph.html"
+    # Extract the base name of the input JSON file
+    base_name = Path(
+        knowledge_graph_data.get("metadata", {}).get("filename", "knowledge_graph")
+    ).stem
+
+    graphml_file = output_dir / f"{base_name}.graphml"
+    html_file = output_dir / f"{base_name}.html"
 
     # Convert to GraphML
     graphml = _convert_to_graphml(knowledge_graph_data)

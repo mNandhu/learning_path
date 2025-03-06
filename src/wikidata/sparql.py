@@ -92,8 +92,10 @@ def get_programming_topics_from_wikidata(limit: int = 20):
                     topics[topic_id]["properties"][key] = str(value)
                 redis_client.hset(topic_id, mapping=topics[topic_id]["properties"])
 
-        # Rate limiting to respect Wikidata servers - more consistent approach
-        time.sleep(1 + (i > 0 and i % 5 == 0))  # Sleep 1s normally, 2s every 5 requests
+            # Rate limiting to respect Wikidata servers
+            time.sleep(
+                1 + (i > 0 and i % 5 == 0)
+            )  # Sleep 1s normally, 2s every 5 requests
 
     return list(topics.values())
 

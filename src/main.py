@@ -17,9 +17,12 @@ def main():
         # Add timestamp to output filename for versioning
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         output_file = output_dir / f"programming_knowledge_graph_{timestamp}.json"
+        enriched_output_file = (
+            output_dir / f"enriched_programming_topics_{timestamp}.json"
+        )
 
         # Get topics from Wikidata
-        topics = get_programming_topics_from_wikidata(limit=20)
+        topics = get_programming_topics_from_wikidata(limit=50)
 
         if not topics:
             logger.error("Failed to retrieve topics from Wikidata")
@@ -30,6 +33,12 @@ def main():
         # Enrich with Wikipedia data
         enriched_topics = enrich_with_wikipedia(topics)
 
+        # Save enriched topics to JSON file
+        with open(enriched_output_file, "w", encoding="utf-8") as f:
+            json.dump(enriched_topics, f, ensure_ascii=False, indent=2)
+        logger.info(f"Successfully saved enriched topics to {enriched_output_file}")
+        logger.info(f"Successfully enriched {len(topics)} topics with Wikipedia data")
+
         # Create knowledge graph data
         knowledge_graph_data = create_knowledge_graph_data(enriched_topics)
 
@@ -38,6 +47,7 @@ def main():
             "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
             "topic_count": len(topics),
             "edge_count": len(knowledge_graph_data["edges"]),
+            "filename": output_file.name,
         }
 
         # Save to JSON file
