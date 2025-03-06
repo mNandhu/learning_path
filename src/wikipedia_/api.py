@@ -7,8 +7,9 @@ import json
 import re
 from src.logger import logger
 from typing import List, Dict, Any
-from ..database.redis import get_redis_client
 from src.config import WIKIPEDIA_USER_AGENT, REDIS_CACHE_EXPIRATION, BATCH_SIZE
+from src.database.redis import get_redis_client
+from src.database.mongo import store_topics_in_mongo
 
 # Configure user-agent for all Wikipedia API requests
 wikipedia.set_user_agent(WIKIPEDIA_USER_AGENT)
@@ -16,7 +17,7 @@ wikipedia.set_user_agent(WIKIPEDIA_USER_AGENT)
 
 # New async version
 async def enrich_with_wikipedia(
-    topics: List[Dict[str, Any]],
+    topics: List[Dict[str, Any]], domain: str
 ) -> List[Dict[str, Any]]:
     """Enrich Wikidata topics with information from Wikipedia (async).
 
@@ -46,6 +47,19 @@ async def enrich_with_wikipedia(
 
         # Wait for all tasks in this batch to complete
         await asyncio.gather(*tasks)
+
+        collected_topics = {
+            topic_id: topics[topic_id] for topic_id in batch if topic_id in topics
+        }
+
+        # Store the collected topics in MongoDB
+        success = await store_topics_in_mongo(collected_topics.values(), domain)
+        if success:
+            logger.info(
+                f"Successfully stored {len(collected_topics)} topics in MongoDB"
+            )
+        else:
+            logger.warning("Failed to store topics in MongoDB")
 
         # Add a small delay between batches to avoid rate limiting
         if batch_idx < len(batches) - 1:

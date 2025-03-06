@@ -96,7 +96,7 @@ async def get_topics_from_wikidata(
             ]
         )
 
-        # Add a small delay between batches to avoid overwhelming the server
+        # Sleep to avoid overwhelming the server
         await asyncio.sleep(0.5)
 
     return list(topics.values())

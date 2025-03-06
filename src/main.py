@@ -9,7 +9,6 @@ from src.wikidata.sparql import get_topics_from_wikidata
 from src.wikipedia_.api import enrich_with_wikipedia
 from src.knowledge_graph.knowledge_graph import create_knowledge_graph_data
 from src.knowledge_graph.visualize_graph import generate_graphml_and_save_as_html
-from src.database.mongo import store_topics_in_mongo
 from src.config import OUTPUT_DIR, DEFAULT_GRAPH_LIMIT, DOMAIN
 from src.wikidata.queries import DOMAIN_CONFIGS
 from src.logger import logger
@@ -56,14 +55,7 @@ async def main(domain: str = DOMAIN, limit: int = DEFAULT_GRAPH_LIMIT) -> None:
         )
 
         # Enrich with Wikipedia data using async
-        enriched_topics = await enrich_with_wikipedia(topics)
-
-        # Save enriched topics to MongoDB
-        success = await store_topics_in_mongo(enriched_topics, domain)
-        if success:
-            logger.info(f"Successfully stored {len(enriched_topics)} topics in MongoDB")
-        else:
-            logger.warning("Failed to store topics in MongoDB")
+        enriched_topics = await enrich_with_wikipedia(topics, domain=domain)
 
         # Save enriched topics to JSON file
         with open(enriched_output_file, "w", encoding="utf-8") as f:
