@@ -7,7 +7,9 @@ from logger import logger
 def get_programming_topics_from_wikidata(limit=20):
     """Fetch programming-related topics from Wikidata using SPARQL."""
     logger.info("Fetching programming topics from Wikidata...")
-    sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
+    sparql = SPARQLWrapper(
+        "https://query.wikidata.org/sparql", agent="LearningPathGenerator/0.1"
+    )
     sparql.setReturnFormat(JSON)
 
     # Query for programming languages, paradigms, concepts, frameworks, and development
@@ -70,18 +72,18 @@ def get_programming_topics_from_wikidata(limit=20):
     for i, topic_id in enumerate(tqdm(topic_ids, desc="Fetching topic properties")):
         get_topic_properties(topic_id, topics[topic_id])
 
-        # Rate limiting to respect Wikidata servers
-        if i % 5 == 0 and i > 0:
-            time.sleep(2)
+        # Rate limiting to respect Wikidata servers - more consistent approach
+        time.sleep(1 + (i > 0 and i % 5 == 0))  # Sleep 1s normally, 2s every 5 requests
 
     return list(topics.values())
 
 
 def get_topic_properties(topic_id, topic):
     """Get detailed properties for a specific topic."""
-    sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
+    sparql = SPARQLWrapper(
+        "https://query.wikidata.org/sparql", agent="LearningPathGenerator/0.1"
+    )
     sparql.setReturnFormat(JSON)
-
     # Query for specific properties relevant to programming topics
     query = f"""
     SELECT ?property ?propertyLabel ?value ?valueLabel
@@ -146,5 +148,9 @@ def get_topic_properties(topic_id, topic):
             ):
                 topic["properties"][property_label].append(value_object)
 
+        return True
+
     except Exception as e:
         logger.error(f"Error fetching properties for {topic_id}: {str(e)}")
+        # Ensure we return a value to indicate failure
+        return False

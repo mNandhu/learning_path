@@ -8,3 +8,16 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Logs
+logs/
+*.log
+
+# IDE files
+.idea/
+.vscode/
+.ruff_cache
+
+# Program output
+output/
+lib/

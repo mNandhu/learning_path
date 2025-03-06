@@ -7,6 +7,11 @@ from tqdm import tqdm
 from logger import logger
 
 
+# Configure user-agent for all Wikipedia API requests
+USER_AGENT = "LearningPathGenerator/0.1 (https://github.com/yourusername/learning_path)"
+wikipedia.set_user_agent(USER_AGENT)
+
+
 def enrich_with_wikipedia(topics):
     """Enrich Wikidata topics with information from Wikipedia."""
     logger.info("Enriching topics with Wikipedia data...")
@@ -38,7 +43,8 @@ def enrich_with_wikipedia(topics):
                             add_wikipedia_data(topic, page)
                             found = True
                             break
-                        except Exception:
+                        except Exception as ex:
+                            logger.debug(f"Failed with option '{option}': {str(ex)}")
                             continue
                 if found:
                     break
@@ -48,7 +54,10 @@ def enrich_with_wikipedia(topics):
                 try:
                     page = wikipedia.page(options[0], auto_suggest=False)
                     add_wikipedia_data(topic, page)
-                except Exception:
+                except Exception as ex:
+                    logger.warning(
+                        f"Failed with fallback option '{options[0]}': {str(ex)}"
+                    )
                     set_empty_wikipedia_data(
                         topic, f"Could not resolve disambiguation for {title}"
                     )
@@ -75,7 +84,8 @@ def enrich_with_wikipedia(topics):
                         add_wikipedia_data(topic, page)
                         found = True
                         break
-                except Exception:
+                except Exception as ex:
+                    logger.debug(f"Search failed for '{term}': {str(ex)}")
                     continue
 
             if not found:
@@ -99,12 +109,19 @@ def add_wikipedia_data(topic, page):
     # Get page sections from TOC
     sections = []
     try:
-        soup = BeautifulSoup(requests.get(page.url).text, "html.parser")
+        # Use requests with a user agent header
+        headers = {"User-Agent": USER_AGENT}
+        response = requests.get(page.url, headers=headers, timeout=10)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+
+        soup = BeautifulSoup(response.text, features="html.parser")
         toc = soup.find(id="toc")
         if toc:
             sections = [li.a.text.strip() for li in toc.find_all("li") if li.a]
-    except Exception:
-        pass
+    except requests.RequestException as e:
+        logger.warning(f"Failed to fetch TOC for {page.title}: {str(e)}")
+    except Exception as e:
+        logger.warning(f"Error parsing TOC for {page.title}: {str(e)}")
 
     topic.update(
         {
