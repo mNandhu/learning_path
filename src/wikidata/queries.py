@@ -6,29 +6,34 @@ DOMAIN_CONFIGS = {
         "name": "Programming",
         "topics": [
             {
+                "type": "object_oriented_programming",
+                "entity_id": "Q79872",
+                "description": "programming paradigm based on the concept of objects",
+            },
+            {
                 "type": "programming_language",
                 "entity_id": "Q9143",
                 "description": "Programming languages",
             },
             {
                 "type": "programming_paradigm",
-                "entity_id": "Q80286",
+                "entity_id": "Q188267",
                 "description": "Programming paradigms",
             },
             {
-                "type": "programming_concept",
-                "entity_id": "Q1936517",
-                "description": "Programming concepts and data structures",
-            },
-            {
                 "type": "software_framework",
-                "entity_id": "Q1130561",
+                "entity_id": "Q271680",
                 "description": "Software frameworks",
             },
             {
                 "type": "software_development",
-                "entity_id": "Q3965310",
+                "entity_id": "Q638608",
                 "description": "Software development",
+            },
+            {
+                "type": "computer_programming",
+                "entity_id": "Q80006",
+                "description": "the process of designing and building an executable computer program to accomplish a specific computing result or to perform a specific task",
             },
         ],
     },
