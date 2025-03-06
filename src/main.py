@@ -1,19 +1,22 @@
 """Main entry point for the learning path knowledge graph generator."""
 
+import asyncio
+import json
+import time
+import argparse
+
 from src.wikidata.sparql import get_topics_from_wikidata
 from src.wikipedia_.api import enrich_with_wikipedia
 from src.knowledge_graph.knowledge_graph import create_knowledge_graph_data
 from src.knowledge_graph.visualize_graph import generate_graphml_and_save_as_html
+from src.database.mongo import store_topics_in_mongo
 from src.config import OUTPUT_DIR, DEFAULT_GRAPH_LIMIT, DOMAIN
 from src.wikidata.queries import DOMAIN_CONFIGS
-import json
 from src.logger import logger
-import time
-import argparse
 
 
-def main(domain: str = DOMAIN, limit: int = DEFAULT_GRAPH_LIMIT) -> None:
-    """Main function to generate the domain knowledge graph.
+async def main(domain: str = DOMAIN, limit: int = DEFAULT_GRAPH_LIMIT) -> None:
+    """Async main function to generate the domain knowledge graph.
 
     Args:
         domain: The knowledge domain to use (e.g., "programming", "mathematics")
@@ -29,7 +32,7 @@ def main(domain: str = DOMAIN, limit: int = DEFAULT_GRAPH_LIMIT) -> None:
             domain = DOMAIN
 
         logger.info(
-            f"Generating knowledge graph for domain: {DOMAIN_CONFIGS[domain]['name']}"
+            f"Generating knowledge graph for domain: {DOMAIN_CONFIGS[domain]['name']} (async mode)"
         )
 
         # Create output directory
@@ -42,8 +45,8 @@ def main(domain: str = DOMAIN, limit: int = DEFAULT_GRAPH_LIMIT) -> None:
         output_file = timestamp_dir / f"{domain}_knowledge_graph.json"
         enriched_output_file = timestamp_dir / f"enriched_{domain}_topics.json"
 
-        # Get topics from Wikidata for the specified domain
-        topics = get_topics_from_wikidata(domain=domain, limit=limit)
+        # Get topics from Wikidata for the specified domain using async
+        topics = await get_topics_from_wikidata(domain=domain, limit=limit)
         if not topics:
             logger.error(f"Failed to retrieve {domain} topics from Wikidata")
             return
@@ -52,8 +55,15 @@ def main(domain: str = DOMAIN, limit: int = DEFAULT_GRAPH_LIMIT) -> None:
             f"Successfully retrieved {len(topics)} {domain} topics from Wikidata"
         )
 
-        # Enrich with Wikipedia data
-        enriched_topics = enrich_with_wikipedia(topics)
+        # Enrich with Wikipedia data using async
+        enriched_topics = await enrich_with_wikipedia(topics)
+
+        # Save enriched topics to MongoDB
+        success = await store_topics_in_mongo(enriched_topics, domain)
+        if success:
+            logger.info(f"Successfully stored {len(enriched_topics)} topics in MongoDB")
+        else:
+            logger.warning("Failed to store topics in MongoDB")
 
         # Save enriched topics to JSON file
         with open(enriched_output_file, "w", encoding="utf-8") as f:
@@ -111,4 +121,4 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    main(domain=args.domain, limit=args.limit)
+    asyncio.run(main(domain=args.domain, limit=args.limit))

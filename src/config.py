@@ -18,6 +18,11 @@ REDIS_PORT = 6379
 REDIS_DB = 0
 REDIS_CACHE_EXPIRATION = 86400  # 24 hours in seconds
 
+# Mongo Configuration
+MONGO_URI = "mongodb://localhost:27017/"
+MONGO_DB = "learning_path"
+MONGO_COLLECTION = "topics"
+
 # File Paths
 OUTPUT_DIR = Path("output")
 LOG_DIR = Path("logs")
@@ -52,3 +57,4 @@ TOPIC_TYPE_COLORS = DOMAIN_COLORS.get(DOMAIN, DOMAIN_COLORS["programming"])
 RATE_LIMIT_DELAY = 0.5
 RATE_LIMIT_BURST_THRESHOLD = 5
 RATE_LIMIT_BURST_DELAY = 0.5
+BATCH_SIZE = 100
