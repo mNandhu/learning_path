@@ -5,6 +5,7 @@ import aiohttp
 import json
 from src.logger import logger
 from src.database.redis import get_redis_client
+from src.database.mongo import store_topics_in_mongo
 from typing import List, Dict, Any, Optional
 from src.config import (
     WIKIDATA_ENDPOINT,
@@ -96,8 +97,19 @@ async def get_topics_from_wikidata(
             ]
         )
 
-        # Add a small delay between batches to avoid overwhelming the server
-        await asyncio.sleep(0.5)
+        # Only the topics that were successfully processed in this batch
+        collected_topics = {
+            topic_id: topics[topic_id] for topic_id in batch if topic_id in topics
+        }
+
+        # Store the collected topics in MongoDB
+        success = await store_topics_in_mongo(collected_topics.values(), domain)
+        if success:
+            logger.info(
+                f"Successfully stored {len(collected_topics)} topics in MongoDB"
+            )
+        else:
+            logger.warning("Failed to store topics in MongoDB")
 
     return list(topics.values())
 
