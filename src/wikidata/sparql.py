@@ -2,9 +2,10 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 import time
 from tqdm import tqdm
 from logger import logger
+from ..database.redis import get_redis_client
 
 
-def get_programming_topics_from_wikidata(limit=20):
+def get_programming_topics_from_wikidata(limit: int = 20):
     """Fetch programming-related topics from Wikidata using SPARQL."""
     logger.info("Fetching programming topics from Wikidata...")
     sparql = SPARQLWrapper(
@@ -69,8 +70,27 @@ def get_programming_topics_from_wikidata(limit=20):
 
     # Get additional properties for each topic
     topic_ids = list(topics.keys())
+    redis_client = get_redis_client()
     for i, topic_id in enumerate(tqdm(topic_ids, desc="Fetching topic properties")):
-        get_topic_properties(topic_id, topics[topic_id])
+        # Check if we have already fetched properties for this topic
+        cached_properties = redis_client.hgetall(topic_id)
+        if cached_properties:
+            # Retrieve properties from cache
+            topic = topics[topic_id]
+            topic["properties"] = {
+                k.decode("utf-8"): v.decode("utf-8")
+                for k, v in cached_properties.items()
+            }
+        else:
+            # Fetch properties from Wikidata
+            success = get_topic_properties(topic_id, topics[topic_id])
+
+            # Cache properties if successful
+            if success:
+                # Convert lists to strings for storage in Redis
+                for key, value in topics[topic_id]["properties"].items():
+                    topics[topic_id]["properties"][key] = str(value)
+                redis_client.hset(topic_id, mapping=topics[topic_id]["properties"])
 
         # Rate limiting to respect Wikidata servers - more consistent approach
         time.sleep(1 + (i > 0 and i % 5 == 0))  # Sleep 1s normally, 2s every 5 requests

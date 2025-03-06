@@ -150,7 +150,7 @@ def _save_as_html(G, output_path):
     logger.info(f"Interactive visualization saved to {output_path}")
 
 
-def generate_graphml_and_save_as_html(knowledge_graph_data, output_dir="output"):
+def generate_graphml_and_save_as_html(knowledge_graph_data: dict, output_dir="output"):
     """Generate and save the knowledge graph as GraphML and HTML files."""
     logger.info("Generating and saving knowledge graph visualizations...")
 

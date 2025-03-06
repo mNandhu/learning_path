@@ -21,3 +21,6 @@ logs/
 # Program output
 output/
 lib/
+
+# User generated files
+.env

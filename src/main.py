@@ -1,11 +1,11 @@
-from sparql import get_programming_topics_from_wikidata
-from wikipedia_api import enrich_with_wikipedia
-from knowledge_graph import create_knowledge_graph_data
+from src.wikidata.sparql import get_programming_topics_from_wikidata
+from src.wikipedia_.api import enrich_with_wikipedia
+from knowledge_graph.knowledge_graph import create_knowledge_graph_data
 import json
 from logger import logger
 from pathlib import Path
 import time
-from visualize_graph import generate_graphml_and_save_as_html
+from src.knowledge_graph.visualize_graph import generate_graphml_and_save_as_html
 
 
 def main():
@@ -44,6 +44,7 @@ def main():
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(knowledge_graph_data, f, ensure_ascii=False, indent=2)
 
+        # Generate and save knowledge graph visualization
         generate_graphml_and_save_as_html(knowledge_graph_data)
 
         logger.info(
