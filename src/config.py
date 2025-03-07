@@ -2,6 +2,11 @@
 
 from pathlib import Path
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Domain Configuration
 DOMAIN = "programming"  # Can be changed to "mathematics" or other supported domains
 
@@ -13,15 +18,15 @@ WIKIPEDIA_USER_AGENT = (
 )
 
 # Redis Configuration
-REDIS_HOST = "localhost"
-REDIS_PORT = 6379
-REDIS_DB = 0
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = os.getenv("REDIS_PORT", 6379)
+REDIS_DB = os.getenv("REDIS_DB", 0)
 REDIS_CACHE_EXPIRATION = 86400  # 24 hours in seconds
 
 # Mongo Configuration
-MONGO_URI = "mongodb://localhost:27017/"
-MONGO_DB = "learning_path"
-MONGO_COLLECTION = "topics"
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+MONGO_DB = os.getenv("MONGO_DB", "learning_path")
+MONGO_COLLECTION = os.getenv("MONGO_COLLECTION", "topics")
 
 # File Paths
 OUTPUT_DIR = Path("output")
