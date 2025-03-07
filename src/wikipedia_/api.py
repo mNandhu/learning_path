@@ -48,16 +48,10 @@ async def enrich_with_wikipedia(
         # Wait for all tasks in this batch to complete
         await asyncio.gather(*tasks)
 
-        collected_topics = {
-            topic_id: topics[topic_id] for topic_id in batch if topic_id in topics
-        }
-
         # Store the collected topics in MongoDB
-        success = await store_topics_in_mongo(collected_topics.values(), domain)
+        success = await store_topics_in_mongo(batch, domain)
         if success:
-            logger.info(
-                f"Successfully stored {len(collected_topics)} topics in MongoDB"
-            )
+            logger.info(f"Successfully stored {len(batch)} topics in MongoDB")
         else:
             logger.warning("Failed to store topics in MongoDB")
 
