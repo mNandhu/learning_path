@@ -40,7 +40,7 @@ uv sync --reinstall
 Run the main script to generate the knowledge graph:
 
 ```bash
-python src/main.py
+python -m src.main.py --limit 10 --domain programming
 ```
 
 The output will be saved to the `output` directory with a timestamp in the filename.
