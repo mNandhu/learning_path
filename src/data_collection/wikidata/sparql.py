@@ -12,7 +12,7 @@ from src.config import (
     DOMAIN,
     BATCH_SIZE,
 )
-from src.wikidata.queries import get_topic_query, get_properties_query, DOMAIN_CONFIGS
+from .queries import get_topic_query, get_properties_query, DOMAIN_CONFIGS
 
 
 async def get_topics_from_wikidata(

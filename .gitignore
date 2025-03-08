@@ -24,3 +24,6 @@ lib/
 
 # User generated files
 .env
+
+# Custom prompt files
+.github/prompts

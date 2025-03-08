@@ -4,7 +4,6 @@ import random
 import json
 from pathlib import Path
 import os
-import time
 from src.config import DOMAIN_COLORS, DOMAIN, TOPIC_TYPE_COLORS
 from src.logger import logger
 
@@ -216,28 +215,20 @@ def _save_as_html(G, output_path):
     logger.info(f"Interactive visualization saved to {output_path}")
 
 
-def generate_graphml_and_save_as_html(knowledge_graph_data: dict, output_dir="output"):
+def generate_graphml_and_save_as_html(knowledge_graph_data: dict, save_dir: str):
     """Generate and save the knowledge graph as GraphML and HTML files."""
     logger.info("Generating and saving knowledge graph visualizations...")
 
     # Create output directory if it doesn't exist
-    output_dir = Path(output_dir)
-    output_dir.mkdir(exist_ok=True)
+    save_dir = Path(save_dir)
+    save_dir.mkdir(exist_ok=True, parents=True)
 
     # Set filenames
     # Extract the base name of the input JSON file
-    base_name = Path(
-        knowledge_graph_data.get("metadata", {}).get("filename", "knowledge_graph")
-    ).stem
+    base_name = "knowledge_graph"
 
-    timestamp_dir = knowledge_graph_data.get("metadata", {}).get(
-        "timestamp", time.strftime("%Y%m%d_%H%M%S")
-    )
-    timestamp_path = output_dir / timestamp_dir
-    timestamp_path.mkdir(exist_ok=True)
-
-    graphml_file = timestamp_path / f"{base_name}.graphml"
-    html_file = timestamp_path / f"{base_name}.html"
+    graphml_file = save_dir / f"{base_name}.graphml"
+    html_file = save_dir / f"{base_name}.html"
 
     # Convert to GraphML
     graphml = _convert_to_graphml(knowledge_graph_data)
