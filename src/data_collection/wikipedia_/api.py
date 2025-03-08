@@ -23,6 +23,7 @@ async def enrich_with_wikipedia(
 
     Args:
         topics: List of topic dictionaries from Wikidata
+        domain: The domain of topics (e.g., "programming")
 
     Returns:
         The same list of topics with added Wikipedia information
@@ -259,7 +260,7 @@ async def async_add_wikipedia_data(
     except aiohttp.ClientError as e:
         logger.warning(f"Failed to fetch TOC for {page.title}: {str(e)}")
     except Exception as e:
-        logger.warning(f"Error parsing TOC for {page.title}: {str(e)}")
+        logger.debug(f"Error parsing TOC for {page.title}: {str(e)}")
 
     topic.update(
         {
