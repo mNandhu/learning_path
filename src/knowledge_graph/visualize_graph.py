@@ -5,7 +5,9 @@ import json
 from pathlib import Path
 import os
 from src.config import DOMAIN_COLORS, DOMAIN, TOPIC_TYPE_COLORS
-from src.logger import logger
+from src.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def _convert_to_graphml(knowledge_graph_data):

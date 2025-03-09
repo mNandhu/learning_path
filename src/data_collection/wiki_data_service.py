@@ -1,7 +1,9 @@
 from .wikidata.sparql import get_topics_from_wikidata
 from .wikipedia_.api import enrich_with_wikipedia
-from src.logger import logger
+from src.logger import get_logger
 import json
+
+logger = get_logger(__name__)
 
 
 async def get_data_from_wiki(domain: str, limit: int) -> list:

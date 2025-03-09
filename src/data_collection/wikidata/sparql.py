@@ -3,7 +3,7 @@
 import asyncio
 import aiohttp
 import json
-from src.logger import logger
+from src.logger import get_logger
 from src.database.redis import get_redis_client
 from typing import List, Dict, Any, Optional
 from src.config import (
@@ -13,6 +13,8 @@ from src.config import (
     BATCH_SIZE,
 )
 from .queries import get_topic_query, get_properties_query, DOMAIN_CONFIGS
+
+logger = get_logger(__name__)
 
 
 async def get_topics_from_wikidata(

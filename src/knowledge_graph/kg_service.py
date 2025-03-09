@@ -1,10 +1,12 @@
 import json
 import time
 
-from src.logger import logger
+from src.logger import get_logger
 from src.config import DOMAIN_CONFIGS
 from .generate_kg import create_knowledge_graph_data
 from .visualize_graph import generate_graphml_and_save_as_html
+
+logger = get_logger(__name__)
 
 
 async def get_and_save_kg(domain, enriched_topics: list, save_dir: str) -> dict:

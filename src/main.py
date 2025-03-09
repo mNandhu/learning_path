@@ -7,7 +7,9 @@ import argparse
 from src.data_collection import get_and_save_from_wiki
 from src.knowledge_graph import get_and_save_kg
 from src.config import OUTPUT_DIR, DEFAULT_GRAPH_LIMIT, DOMAIN, DOMAIN_CONFIGS
-from src.logger import logger
+from src.logger import get_logger
+
+logger = get_logger()
 
 
 async def main(domain: str = DOMAIN, limit: int = DEFAULT_GRAPH_LIMIT) -> None:

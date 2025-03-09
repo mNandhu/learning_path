@@ -5,11 +5,14 @@ import asyncio
 from bs4 import BeautifulSoup
 import json
 import re
-from src.logger import logger
+from src.logger import get_logger
 from typing import List, Dict, Any
 from src.config import WIKIPEDIA_USER_AGENT, REDIS_CACHE_EXPIRATION, BATCH_SIZE
 from src.database.redis import get_redis_client
 from src.database.mongo import store_topics_in_mongo
+
+# Initialize the logger
+logger = get_logger(__name__)
 
 # Configure user-agent for all Wikipedia API requests
 wikipedia.set_user_agent(WIKIPEDIA_USER_AGENT)

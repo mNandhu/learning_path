@@ -2,8 +2,10 @@
 
 import redis
 from redis import Redis, ConnectionPool
-from src.logger import logger
+from src.logger import get_logger
 from src.config import REDIS_HOST, REDIS_PORT, REDIS_DB
+
+logger = get_logger(__name__)
 
 # Global connection pool for Redis
 _redis_pool = None

@@ -1,7 +1,9 @@
-from src.logger import logger
+from src.logger import get_logger
 import re
 from typing import Dict, List, Any, Set
 import json
+
+logger = get_logger(__name__)
 
 
 def create_knowledge_graph_data(topics: List[Dict[str, Any]]) -> Dict[str, Any]:
