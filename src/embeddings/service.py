@@ -56,7 +56,7 @@ async def generate_embedding_async(text: str) -> List[float]:
         # Use ollama.AsyncClient for async operations
         ollama_client = ollama.AsyncClient(host=OLLAMA_BASE_URL)
         response = await ollama_client.embed(model=OLLAMA_EMBEDDING_MODEL, input=text)
-        return response["embedding"]
+        return response.embeddings
 
     except Exception as e:
         logger.error(f"Error generating embeddings: {str(e)}")
@@ -76,7 +76,7 @@ def generate_embedding(text: str) -> List[float]:
         # Use ollama.Client for sync operations
         ollama_client = ollama.Client(host=OLLAMA_BASE_URL)
         response = ollama_client.embed(model=OLLAMA_EMBEDDING_MODEL, input=text)
-        return response["embedding"]
+        return response.embeddings
 
     except Exception as e:
         logger.error(f"Error generating embeddings: {str(e)}")
@@ -116,10 +116,8 @@ def generate_embeddings_batch(texts: List[str]) -> List[List[float]]:
         for i in range(0, len(texts), batch_size):
             batch_texts = texts[i : i + batch_size]
             for text in batch_texts:
-                response = ollama_client.embed(
-                    model=OLLAMA_EMBEDDING_MODEL, text=text
-                )
-                embeddings.append(response["embedding"])
+                response = ollama_client.embed(model=OLLAMA_EMBEDDING_MODEL, text=text)
+                embeddings.append(response.embeddings)
 
         return embeddings
     except Exception as e:
@@ -132,7 +130,7 @@ def generate_embeddings_batch(texts: List[str]) -> List[List[float]]:
 
         if loop and loop.is_running():
             logger.warning(
-            "An event loop is already running. Falling back to synchronous embedding."
+                "An event loop is already running. Falling back to synchronous embedding."
             )
             # If a loop is running, execute tasks synchronously
             embeddings = [generate_embedding(text) for text in texts]

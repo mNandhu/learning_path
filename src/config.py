@@ -18,8 +18,8 @@ WIKIPEDIA_USER_AGENT = (
 )
 
 # Redis Configuration
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT = os.getenv("REDIS_PORT", 6379)
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = os.getenv("REDIS_PORT")
 REDIS_DB = os.getenv("REDIS_DB", 0)
 REDIS_CACHE_EXPIRATION = 86400  # 24 hours in seconds
 

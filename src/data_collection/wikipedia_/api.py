@@ -20,13 +20,14 @@ wikipedia.set_user_agent(WIKIPEDIA_USER_AGENT)
 
 # New async version
 async def enrich_with_wikipedia(
-    topics: List[Dict[str, Any]], domain: str
+    topics: List[Dict[str, Any]], domain: str, save_to_mongo: bool
 ) -> List[Dict[str, Any]]:
     """Enrich Wikidata topics with information from Wikipedia (async).
 
     Args:
         topics: List of topic dictionaries from Wikidata
         domain: The domain of topics (e.g., "programming")
+        save_to_mongo: Whether to save the enriched topics to MongoDB
 
     Returns:
         The same list of topics with added Wikipedia information
@@ -52,12 +53,17 @@ async def enrich_with_wikipedia(
         # Wait for all tasks in this batch to complete
         await asyncio.gather(*tasks)
 
-        # Store the collected topics in MongoDB
-        success = await store_topics_in_mongo(batch, domain)
-        if success:
-            logger.info(f"Successfully stored {len(batch)} topics in MongoDB")
-        else:
-            logger.warning("Failed to store topics in MongoDB")
+        # Add domain to each topic
+        for topic in topics:
+            topic["domain"] = domain
+
+        if save_to_mongo:
+            # Store the collected topics in MongoDB
+            success = await store_topics_in_mongo(batch, domain)
+            if success:
+                logger.info(f"Successfully stored {len(batch)} topics in MongoDB")
+            else:
+                logger.warning("Failed to store topics in MongoDB")
 
         # Add a small delay between batches to avoid rate limiting
         if batch_idx < len(batches) - 1:

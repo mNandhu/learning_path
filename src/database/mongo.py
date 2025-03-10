@@ -29,10 +29,6 @@ async def store_topics_in_mongo(topics: List[Dict[str, Any]], domain: str) -> bo
         db = client[MONGO_DB]
         collection = db[MONGO_COLLECTION]
 
-        # Add domain to each topic
-        for topic in topics:
-            topic["domain"] = domain
-
         # Bulk insert or update topics
         if topics:
             # Use topic['id'] as the key for upsert operations

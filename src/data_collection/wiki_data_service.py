@@ -6,12 +6,13 @@ import json
 logger = get_logger(__name__)
 
 
-async def get_data_from_wiki(domain: str, limit: int) -> list:
+async def get_data_from_wiki(domain: str, limit: int, save_to_mongo=True) -> list:
     """
     Fetch and enrich topics from Wikidata and Wikipedia.
     Args:
         domain: The knowledge domain to use (e.g., "programming", "mathematics")
         limit: Maximum number of topics to fetch
+        save_to_mongo: Whether to save the enriched topics to MongoDB
     Returns:
         List of enriched topics
     """
@@ -24,7 +25,9 @@ async def get_data_from_wiki(domain: str, limit: int) -> list:
     logger.info(f"Successfully retrieved {len(topics)} {domain} topics from Wikidata")
 
     # Enrich with Wikipedia data using async
-    enriched_topics = await enrich_with_wikipedia(topics, domain=domain)
+    enriched_topics = await enrich_with_wikipedia(
+        topics, domain=domain, save_to_mongo=save_to_mongo
+    )
     if not enriched_topics:
         logger.error(f"Failed to enrich {domain} topics with Wikipedia data")
         return

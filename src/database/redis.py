@@ -34,6 +34,11 @@ def get_redis_pool() -> ConnectionPool:
 def get_redis_client() -> Redis:
     """Get a Redis client using the connection pool with proper error handling."""
     try:
+        if REDIS_HOST is None or REDIS_PORT is None:
+            # Use FallbackCache if Redis host or port is not set
+            logger.warning("Redis host or port not set, using fallback cache")
+            return FallbackCache()
+
         return Redis(connection_pool=get_redis_pool())
     except Exception as e:
         logger.error(f"Failed to connect to Redis: {str(e)}")
