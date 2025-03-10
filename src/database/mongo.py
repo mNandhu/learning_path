@@ -3,7 +3,9 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 from src.config import MONGO_URI, MONGO_DB, MONGO_COLLECTION
 from typing import Dict, Any, List
-from src.logger import logger
+from src.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 async def get_mongo_client():
@@ -50,12 +52,15 @@ async def store_topics_in_mongo(topics: List[Dict[str, Any]], domain: str) -> bo
         return False
 
 
-async def get_topics_from_mongo(domain: str, limit: int = 100) -> List[Dict[str, Any]]:
+async def get_topics_from_mongo(
+    domain: str, limit: int = 100, filter_criteria: Dict[str, Any] = None
+) -> List[Dict[str, Any]]:
     """Retrieve topics from MongoDB by domain.
 
     Args:
         domain: The domain of topics to retrieve
         limit: Maximum number of topics to retrieve
+        filter_criteria: Additional filter criteria (e.g., {"has_embeddings": True})
 
     Returns:
         List of topic dictionaries
@@ -65,7 +70,12 @@ async def get_topics_from_mongo(domain: str, limit: int = 100) -> List[Dict[str,
         db = client[MONGO_DB]
         collection = db[MONGO_COLLECTION]
 
-        cursor = collection.find({"domain": domain}).limit(limit)
+        # Build query
+        query = {"domain": domain}
+        if filter_criteria:
+            query.update(filter_criteria)
+
+        cursor = collection.find(query).limit(limit)
         topics = await cursor.to_list(length=limit)
 
         logger.info(f"Retrieved {len(topics)} topics from MongoDB")
