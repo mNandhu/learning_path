@@ -186,6 +186,7 @@ async def embed_and_store_async(
     logger.info(f"Generating embeddings for {len(chunks)} chunks")
     try:
         embeddings = await generate_embeddings_batch_async(chunks)
+        embeddings = [embedding[0] for embedding in embeddings]  # Flatten the list
     except Exception as e:
         logger.error(f"Failed to generate embeddings for chunks: {str(e)}")
         raise
@@ -214,7 +215,11 @@ async def embed_and_store_async(
             f"Failed to store embeddings in collection '{collection_name}': {str(e)}"
         )
         raise
-
+    finally:
+        count = collection.count()  # Ensure the collection is counted
+        logger.info(
+            f"Collection '{collection_name}' now contains {count} items after storing"
+        )
     return ids
 
 

@@ -27,3 +27,6 @@ lib/
 
 # Custom prompt files
 .github/prompts
+
+# Data files
+chroma/

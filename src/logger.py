@@ -35,7 +35,7 @@ def setup_logger(name=None):
     )
 
     # Create or get the logger
-    if name:
+    if name and name != "__main__":
         logger = logging.getLogger(name)
     else:
         logger = logging.getLogger()

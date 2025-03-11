@@ -1,6 +1,5 @@
 """ChromaDB integration for vector database storage and retrieval."""
 
-import os
 import chromadb
 import logging
 from typing import Dict, List, Optional, Any
@@ -31,7 +30,7 @@ class ChromaDBClient:
             cls._instance._initialized = False
         return cls._instance
 
-    def __init__(self, persist_directory: str = "chroma_db"):
+    def __init__(self, persist_directory: str = "./chroma"):
         """Initialize ChromaDB client.
 
         Args:
@@ -42,14 +41,13 @@ class ChromaDBClient:
 
         self.persist_directory = persist_directory
 
-        # Create directory if it doesn't exist
-        os.makedirs(self.persist_directory, exist_ok=True)
-
         # Initialize client
         try:
             self._client = chromadb.Client(
                 Settings(
-                    persist_directory=self.persist_directory, anonymized_telemetry=False
+                    persist_directory=self.persist_directory,
+                    is_persistent=True,
+                    anonymized_telemetry=False,
                 )
             )
             logger.info(
@@ -92,7 +90,7 @@ class ChromaDBClient:
         try:
             self.client.get_collection(name=name)
             return True
-        except ValueError:
+        except (ValueError, InvalidCollectionException):
             return False
 
     def get_or_create_collection(
@@ -174,5 +172,35 @@ class ChromaDBClient:
 
         logger.info(
             f"Queried collection '{collection_name}' with {len(query_embeddings)} embeddings"
+        )
+        return results
+
+    def query_by_ids(
+        self,
+        collection_name: str,
+        ids: List[str],
+        limit: int = 5,
+    ) -> Dict[str, List]:
+        """Query a collection using document IDs.
+
+        Args:
+            collection_name: Name of the collection
+            ids: List of document IDs to query
+            limit: Number of results to return
+
+        Returns:
+            Dictionary containing query results
+        """
+        # Check if collection exists first
+        if not self.collection_exists(collection_name):
+            raise ValueError(f"Collection '{collection_name}' does not exist")
+
+        # Get the collection
+        collection = self.client.get_collection(name=collection_name)
+
+        results = collection.get(ids=ids, limit=limit)
+
+        logger.info(
+            f"Queried collection '{collection_name}' with {len(ids)} document IDs"
         )
         return results

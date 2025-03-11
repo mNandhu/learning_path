@@ -79,3 +79,21 @@ async def get_topics_from_mongo(
     except Exception as e:
         logger.error(f"Error retrieving topics from MongoDB: {str(e)}")
         return []
+
+
+async def drop_all_embedding_refs():
+    """Drop all embedding references from MongoDB."""
+    try:
+        client = AsyncIOMotorClient(MONGO_URI)
+        db = client[MONGO_DB]
+        collection = db[MONGO_COLLECTION]
+
+        # Drop all embedding references
+        result = await collection.update_many(
+            {}, {"$unset": {"embedding_refs": "", "embedding_error": ""}}
+        )
+        logger.info(
+            f"Dropped {result.modified_count} embedding references from MongoDB"
+        )
+    except Exception as e:
+        logger.error(f"Error dropping embedding references: {str(e)}")

@@ -37,7 +37,9 @@ async def get_data_from_wiki(domain: str, limit: int, save_to_mongo=True) -> lis
     return enriched_topics
 
 
-async def get_and_save_from_wiki(domain: str, limit: int, save_dir: str) -> list:
+async def get_and_save_from_wiki(
+    domain: str, limit: int, save_dir: str, save_to_mongo=True
+) -> list:
     """
     Fetch and enrich topics from Wikidata and Wikipedia.
     Args:
@@ -48,7 +50,9 @@ async def get_and_save_from_wiki(domain: str, limit: int, save_dir: str) -> list
         List of enriched topics
     """
     enriched_output_file = save_dir / f"enriched_{domain}_topics.json"
-    enriched_topics = await get_data_from_wiki(domain=domain, limit=limit)
+    enriched_topics = await get_data_from_wiki(
+        domain=domain, limit=limit, save_to_mongo=save_to_mongo
+    )
     if not enriched_topics:
         logger.error(f"Failed to enrich {domain} topics with Wikipedia data")
         return []
