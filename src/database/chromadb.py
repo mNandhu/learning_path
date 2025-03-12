@@ -180,7 +180,7 @@ class ChromaDBClient:
         collection_name: str,
         ids: List[str],
         limit: int = 5,
-    ) -> Dict[str, List]:
+    ) -> Dict[str, Any]:
         """Query a collection using document IDs.
 
         Args:
@@ -204,3 +204,8 @@ class ChromaDBClient:
             f"Queried collection '{collection_name}' with {len(ids)} document IDs"
         )
         return results
+
+
+if __name__ == "__main__":
+    client = ChromaDBClient()
+    print(client.query_by_ids("attempt1_programming", ids=["Q165436_91_1741683604"]))
